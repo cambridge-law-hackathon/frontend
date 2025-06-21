@@ -12,6 +12,17 @@ yarn dev
 pnpm dev
 # or
 bun dev
+
+
+## Hugging Face repos:
+
+https://huggingface.co/spaces/Baon2024/dynamic_question
+
+and:
+
+https://huggingface.co/spaces/Baon2024/hackathon
+
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
