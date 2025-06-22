@@ -48,14 +48,16 @@ const RiskAnalysis = ({ companyId, companyName }) => {
       let result;
       
       if (analysisType === 'general') {
-        result = await callAPI(analysisAPI.generalAnalysis, companyId);
+        const response = await callAPI(analysisAPI.generalAnalysis, companyId);
+        // For general analysis, the result is returned directly
+        result = response;
       } else {
         if (!riskData.description.trim()) {
           toast.error('Risk description required', 'Please provide a risk description');
           return;
         }
         const response = await callAPI(analysisAPI.dynamicRiskAnalysis, companyId, riskData);
-        // Extract the "result" field for dynamic risk analysis
+        // For dynamic risk analysis, extract the "result" field
         result = response.result || response;
       }
       
@@ -92,12 +94,23 @@ const RiskAnalysis = ({ companyId, companyName }) => {
 
   const getRiskTypeColor = (type) => {
     switch (type?.toLowerCase()) {
-      case 'operational': return 'text-blue-600 bg-blue-100';
-      case 'financial': return 'text-purple-600 bg-purple-100';
-      case 'reputational': return 'text-orange-600 bg-orange-100';
-      case 'legal': return 'text-red-600 bg-red-100';
-      case 'regulatory': return 'text-indigo-600 bg-indigo-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'operational': 
+      case 'operational_risks': 
+        return 'text-blue-600 bg-blue-100';
+      case 'financial': 
+      case 'financial_exposure': 
+        return 'text-purple-600 bg-purple-100';
+      case 'reputational': 
+      case 'reputation_management': 
+        return 'text-orange-600 bg-orange-100';
+      case 'legal': 
+      case 'legal_liabilities': 
+        return 'text-red-600 bg-red-100';
+      case 'regulatory': 
+      case 'regulatory_compliance': 
+        return 'text-indigo-600 bg-indigo-100';
+      default: 
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -215,100 +228,209 @@ const RiskAnalysis = ({ companyId, companyName }) => {
               {analysisType === 'dynamic_risk' && (
                 <div>
                   <h4 className="font-semibold mb-3">Dynamic Risk Analysis Result</h4>
-                  <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                    {typeof analysisResult === 'string' ? (
-                      <p className="whitespace-pre-wrap text-sm">{analysisResult}</p>
+                  <div className="space-y-6">
+                    {/* Try to parse and display structured result */}
+                    {typeof analysisResult === 'object' && analysisResult.risk_analysis ? (
+                      <>
+                        {/* Risk Analysis Section */}
+                        <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                          <h5 className="font-semibold mb-3">Risk Analysis</h5>
+                          
+                          <div className="space-y-4">
+                            {/* Scenario */}
+                            <div>
+                              <h6 className="font-medium mb-1">Scenario</h6>
+                              <p className="text-sm text-gray-700">{analysisResult.risk_analysis.scenario}</p>
+                            </div>
+
+                            {/* Risk Level */}
+                            <div className="flex items-center gap-2">
+                              <h6 className="font-medium">Risk Level:</h6>
+                              <Badge className={getSeverityColor(analysisResult.risk_analysis.risk_level)}>
+                                {analysisResult.risk_analysis.risk_level}
+                              </Badge>
+                            </div>
+
+                            {/* Impact Assessment */}
+                            <div>
+                              <h6 className="font-medium mb-1">Impact Assessment</h6>
+                              <p className="text-sm text-gray-700">{analysisResult.risk_analysis.impact_assessment}</p>
+                            </div>
+
+                            {/* Legal Implications */}
+                            {analysisResult.risk_analysis.legal_implications && (
+                              <div>
+                                <h6 className="font-medium mb-1">Legal Implications</h6>
+                                <p className="text-sm text-gray-700">{analysisResult.risk_analysis.legal_implications}</p>
+                              </div>
+                            )}
+
+                            {/* Regulatory Considerations */}
+                            {analysisResult.risk_analysis.regulatory_considerations && (
+                              <div>
+                                <h6 className="font-medium mb-1">Regulatory Considerations</h6>
+                                <p className="text-sm text-gray-700">{analysisResult.risk_analysis.regulatory_considerations}</p>
+                              </div>
+                            )}
+
+                            {/* Affected Areas */}
+                            {analysisResult.risk_analysis.affected_areas && analysisResult.risk_analysis.affected_areas.length > 0 && (
+                              <div>
+                                <h6 className="font-medium mb-1">Affected Areas</h6>
+                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                  {analysisResult.risk_analysis.affected_areas.map((area, index) => (
+                                    <li key={index}>{area}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* News Triggers */}
+                            {analysisResult.risk_analysis.news_triggers && analysisResult.risk_analysis.news_triggers.length > 0 && (
+                              <div>
+                                <h6 className="font-medium mb-2">News Triggers</h6>
+                                <div className="space-y-2">
+                                  {analysisResult.risk_analysis.news_triggers.map((trigger, index) => (
+                                    <div key={index} className="p-2 bg-white rounded border">
+                                      <p className="font-medium text-sm">{trigger.article_title}</p>
+                                      <p className="text-xs text-gray-600">{trigger.article_source} - {new Date(trigger.article_date).toLocaleDateString()}</p>
+                                      <p className="text-sm text-gray-700 mt-1">{trigger.risk_connection}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Recommendations */}
+                        {analysisResult.recommendations && analysisResult.recommendations.length > 0 && (
+                          <div>
+                            <h5 className="font-semibold mb-3">Recommendations</h5>
+                            <div className="space-y-2">
+                              {analysisResult.recommendations.map((rec, index) => (
+                                <div key={index} className="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                                  <p className="text-sm">{rec}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Next Steps */}
+                        {analysisResult.next_steps && analysisResult.next_steps.length > 0 && (
+                          <div>
+                            <h5 className="font-semibold mb-3">Next Steps</h5>
+                            <div className="space-y-2">
+                              {analysisResult.next_steps.map((step, index) => (
+                                <div key={index} className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                                  <p className="text-sm">{step}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* AI Confidence */}
+                        {analysisResult.ai_confidence && (
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span className="text-sm">
+                              AI Confidence: {(analysisResult.ai_confidence * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        )}
+                      </>
                     ) : (
-                      <pre className="whitespace-pre-wrap text-sm overflow-auto max-h-96">
-                        {JSON.stringify(analysisResult, null, 2)}
-                      </pre>
+                      /* Fallback to raw display if not structured */
+                      <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                        {typeof analysisResult === 'string' ? (
+                          <p className="whitespace-pre-wrap text-sm">{analysisResult}</p>
+                        ) : (
+                          <pre className="whitespace-pre-wrap text-sm overflow-auto max-h-96">
+                            {JSON.stringify(analysisResult, null, 2)}
+                          </pre>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
               )}
 
               {/* General Analysis Results - Only show for general analysis */}
-              {analysisType === 'general' && analysisResult.risk_factors && (
+              {analysisType === 'general' && analysisResult.risk_analysis && (
                 <div>
-                  <h4 className="font-semibold mb-3">Risk Factors</h4>
-                  <div className="space-y-3">
-                    {analysisResult.risk_factors.map((factor, index) => (
-                      <div key={index} className="p-4 border rounded-lg">
+                  {/* Overall Risk Assessment */}
+                  {analysisResult.overall_risk_assessment && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold mb-3">Overall Risk Assessment</h4>
+                      <div className="p-4 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge className={getSeverityColor(factor.severity)}>
-                            {factor.severity}
-                          </Badge>
-                          <Badge className={getRiskTypeColor(factor.risk_type)}>
-                            {factor.risk_type}
+                          <Badge className={getSeverityColor(analysisResult.overall_risk_assessment.overall_risk_level)}>
+                            {analysisResult.overall_risk_assessment.overall_risk_level} Overall Risk
                           </Badge>
                         </div>
-                        <h5 className="font-medium mb-2">{factor.specific_event}</h5>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <p><strong>Affected Contracts:</strong> {factor.affected_contracts}</p>
-                          <p><strong>Affected Clauses:</strong> {factor.affected_clauses}</p>
+                        <p className="text-sm text-gray-600 mb-3">{analysisResult.overall_risk_assessment.summary}</p>
+                        {analysisResult.overall_risk_assessment.critical_issues && (
+                          <div>
+                            <h5 className="font-medium mb-2">Critical Issues:</h5>
+                            <ul className="list-disc list-inside text-sm text-gray-600">
+                              {analysisResult.overall_risk_assessment.critical_issues.map((issue, index) => (
+                                <li key={index}>{issue}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Risk Categories */}
+                  <h4 className="font-semibold mb-3">Risk Categories</h4>
+                  <div className="space-y-4">
+                    {Object.entries(analysisResult.risk_analysis).map(([category, data]) => (
+                      <div key={category} className="p-4 border rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={getRiskTypeColor(category)}>
+                            {category.replace('_', ' ').toUpperCase()}
+                          </Badge>
+                          <Badge className={getSeverityColor(data.risk_level)}>
+                            {data.risk_level} Risk
+                          </Badge>
                         </div>
-                        {factor.narrative && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-sm"><strong>Solutions in Contract:</strong> {factor.narrative.solutions_in_contract}</p>
-                            <p className="text-sm"><strong>Alternative Strategies:</strong> {factor.narrative.alternative_mitigation_strategies}</p>
-                            <p className="text-sm"><strong>Monitoring Tasks:</strong> {factor.narrative.monitoring_tasks}</p>
+                        
+                        <div className="mb-3">
+                          <h5 className="font-medium mb-2">Assessment</h5>
+                          <p className="text-sm text-gray-600">{data.assessment}</p>
+                        </div>
+
+                        {data.key_concerns && data.key_concerns.length > 0 && (
+                          <div className="mb-3">
+                            <h5 className="font-medium mb-2">Key Concerns</h5>
+                            <ul className="list-disc list-inside text-sm text-gray-600">
+                              {data.key_concerns.map((concern, index) => (
+                                <li key={index}>{concern}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {data.news_triggers && data.news_triggers.length > 0 && (
+                          <div>
+                            <h5 className="font-medium mb-2">News Triggers</h5>
+                            <div className="space-y-2">
+                              {data.news_triggers.map((trigger, index) => (
+                                <div key={index} className="p-2 bg-blue-50 rounded text-sm">
+                                  <p className="font-medium">{trigger.article_title}</p>
+                                  <p className="text-gray-600">{trigger.article_source} - {trigger.article_date}</p>
+                                  <p className="text-gray-700 mt-1">{trigger.risk_connection}</p>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
                     ))}
-                  </div>
-                </div>
-              )}
-
-              {/* General Analysis - Other structured results */}
-              {analysisType === 'general' && analysisResult.risk_analysis && (
-                <div>
-                  <h4 className="font-semibold mb-3">Risk Analysis</h4>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="font-medium mb-2">Scenario: {analysisResult.risk_analysis.scenario}</p>
-                      <Badge className={getSeverityColor(analysisResult.risk_analysis.risk_level)}>
-                        {analysisResult.risk_analysis.risk_level} Risk
-                      </Badge>
-                    </div>
-                    
-                    <div>
-                      <h5 className="font-medium mb-2">Impact Assessment</h5>
-                      <p className="text-sm text-gray-600">{analysisResult.risk_analysis.impact_assessment}</p>
-                    </div>
-
-                    {analysisResult.risk_analysis.affected_areas && (
-                      <div>
-                        <h5 className="font-medium mb-2">Affected Areas</h5>
-                        <ul className="list-disc list-inside text-sm text-gray-600">
-                          {analysisResult.risk_analysis.affected_areas.map((area, index) => (
-                            <li key={index}>{area}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* General Analysis - News Analysis */}
-              {analysisType === 'general' && analysisResult.news_analysis && (
-                <div>
-                  <h4 className="font-semibold mb-3">News Analysis</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-3 bg-blue-50 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-blue-600">{analysisResult.news_analysis.articles_found}</p>
-                      <p className="text-sm text-gray-600">Articles Found</p>
-                    </div>
-                    <div className="p-3 bg-orange-50 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-orange-600">
-                        {(analysisResult.news_analysis.negative_sentiment_ratio * 100).toFixed(1)}%
-                      </p>
-                      <p className="text-sm text-gray-600">Negative Sentiment</p>
-                    </div>
-                    <div className="p-3 bg-green-50 rounded-lg text-center">
-                      <p className="text-sm text-gray-600">{analysisResult.news_analysis.market_context}</p>
-                    </div>
                   </div>
                 </div>
               )}
