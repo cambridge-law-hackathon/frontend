@@ -17,71 +17,74 @@ export default function Home() {
   const [companyInput, setCompanyInput] = useState("");
    const [companyDescription, setCompanyDescription] = useState("");
    const [ pdfToExtract, setPdfToExtract ] = useState(null)
+   const [ riskDataReal, setRiskDataReal ] = useState([])
+   const [ specificRisks, setSpecificRisks ] = useState("")
+   const [ specificQuery, setSpecificQuery ] = useState("")
 
    const riskData = {
   risk_factors: [
     {
       severity: "High",
-      specific_event: "Iran tensions escalation",
+      specific_event: "Global supply chain disruptions due to geopolitical tensions",
       risk_type: "Operational Risk",
       affected_contracts: "master_service_agreement.pdf",
-      affected_clauses: "Article 10 – Regulatory Suspension Clause, Article 17 – Force Majeure Clause",
+      affected_clauses: "Section 3: Force Majeure",
       narrative: {
-        solutions_in_contract: "Regulatory suspension and force majeure clauses provide protection against unforeseen events",
-        alternative_mitigation_strategies: "Diversification of energy sources and supplier contracts, investment in conflict resolution and prevention",
-        monitoring_tasks: "Continuous monitoring of global events and tensions, regular review of contractual obligations and supplier relationships"
+        solutions_in_contract: "Contractual protections include provisions for alternative sourcing and renegotiation of terms",
+        alternative_mitigation_strategies: "Developing diversified supply chains and implementing risk management protocols",
+        monitoring_tasks: "Regularly monitoring global events and assessing their potential impact on supply chains"
       }
     },
     {
       severity: "Medium",
-      specific_event: "Global oil market volatility",
+      specific_event: "Fluctuations in oil prices affecting demand for electric vehicles",
       risk_type: "Financial Risk",
-      affected_contracts: "Contract draft between Gasil Global and EuroPOWER",
-      affected_clauses: "Article 7 – Compliance with Law and Sanctions, Article 18 – Termination Of Obligations Under This Contract",
+      affected_contracts: "None",
+      affected_clauses: "N/A",
       narrative: {
-        solutions_in_contract: "Contractual clauses provide protection against non-compliance and termination",
-        alternative_mitigation_strategies: "Hedging strategies, diversification of energy sources and supplier contracts",
-        monitoring_tasks: "Regular review of oil market trends, monitoring of supplier relationships and contractual obligations"
-      }
-    },
-    {
-      severity: "Medium",
-      specific_event: "Negative news coverage",
-      risk_type: "Reputational Risk",
-      affected_contracts: "master_service_agreement.pdf",
-      affected_clauses: "Article 7 – Compliance with Law and Sanctions",
-      narrative: {
-        solutions_in_contract: "Contractual clauses provide protection against non-compliance",
-        alternative_mitigation_strategies: "Crisis management and communication plans, investment in reputation management and public relations",
-        monitoring_tasks: "Continuous monitoring of news coverage and social media, regular review of contractual obligations and supplier relationships"
+        solutions_in_contract: "No specific contractual protections",
+        alternative_mitigation_strategies: "Diversifying product offerings, investing in renewable energy, and developing strategic partnerships",
+        monitoring_tasks: "Tracking oil price trends and assessing their impact on the electric vehicle market"
       }
     },
     {
       severity: "Low",
-      specific_event: "Regulatory changes",
-      risk_type: "Legal Risk",
-      affected_contracts: "Contract draft between Gasil Global and EuroPOWER",
-      affected_clauses: "Article 10 – Regulatory Suspension Clause",
+      specific_event: "Negative media coverage due to recalls or accidents",
+      risk_type: "Reputational Risk",
+      affected_contracts: "None",
+      affected_clauses: "N/A",
       narrative: {
-        solutions_in_contract: "Regulatory suspension clause provides protection against unforeseen regulatory changes",
-        alternative_mitigation_strategies: "Regular review of regulatory changes, investment in compliance and risk management",
-        monitoring_tasks: "Continuous monitoring of regulatory updates, regular review of contractual obligations and supplier relationships"
+        solutions_in_contract: "No specific contractual protections",
+        alternative_mitigation_strategies: "Implementing robust quality control measures, maintaining transparent communication, and engaging in proactive reputation management",
+        monitoring_tasks: "Monitoring media coverage and social media sentiment"
       }
     },
     {
       severity: "High",
-      specific_event: "Non-compliance with sanctions",
+      specific_event: "Non-compliance with evolving regulatory requirements",
+      risk_type: "Regulatory Compliance Risk",
+      affected_contracts: "master_service_agreement.pdf",
+      affected_clauses: "Section 2: Compliance with Laws",
+      narrative: {
+        solutions_in_contract: "Contractual provisions require compliance with applicable laws and regulations",
+        alternative_mitigation_strategies: "Establishing a dedicated compliance team, conducting regular audits, and maintaining open communication with regulatory bodies",
+        monitoring_tasks: "Staying up-to-date with regulatory changes and assessing their impact on business operations"
+      }
+    },
+    {
+      severity: "Medium",
+      specific_event: "Litigation related to intellectual property or product liability",
       risk_type: "Legal Risk",
       affected_contracts: "master_service_agreement.pdf",
-      affected_clauses: "Article 7 – Compliance with Law and Sanctions",
+      affected_clauses: "Section 5: Intellectual Property and Section 7: Indemnification",
       narrative: {
-        solutions_in_contract: "Contractual clauses provide protection against non-compliance",
-        alternative_mitigation_strategies: "Investment in compliance and risk management, regular review of supplier relationships and contractual obligations",
-        monitoring_tasks: "Continuous monitoring of sanctions updates, regular review of contractual obligations and supplier relationships"
+        solutions_in_contract: "Contractual protections include provisions for indemnification and intellectual property rights",
+        alternative_mitigation_strategies: "Developing robust intellectual property protection strategies, conducting regular product safety assessments, and maintaining adequate insurance coverage",
+        monitoring_tasks: "Monitoring potential litigation risks and maintaining open communication with stakeholders"
       }
     }
   ]
-};
+}
   
 
   function addCompany() {
@@ -94,8 +97,9 @@ export default function Home() {
       toast.error("Company already exists","This company is already in your list")
       return
     }
+    //need to replace this with insertion into supabase database
 
-    setCompanies((prev) => [...prev, { name: companyInput.trim(), description: companyDescription }])//will need to replace this with backend api call to add company
+    setCompanies([{ name: companyInput.trim(), description: companyDescription }])//will need to replace this with backend api call to add company
     setCompanyInput("")
     setCompanyDescription("")
     toast.success(`Company added: ${companyInput.trim()} has been added to your list`)
@@ -121,12 +125,15 @@ export default function Home() {
      const formData = new FormData()
     formData.append('file', pdfToExtract);
 
-    const response = await fetch('http://127.0.0.1:5001/api/companies/{company_id}/documents', {
+    let company_id = 75
+
+    /*const response = await fetch(`http://127.0.0.1:5001/api/companies/${company_id}/document`, {
+      //http://127.0.0.1:5001
       method: 'POST',
       body: formData,
-    });
+    });*/
 
-    let data = response.json()
+    //let data = response.json()
     console.log("all okay")
 
     toast.success(`Document successfully uploaded!`)
@@ -135,53 +142,149 @@ export default function Home() {
     //add backend api, to add - use companyId
   }
 
-  return (
+
+  async function specificRisk() {
+
+   let data = `No.
+
+Reason/s:
+- The news summary mentions "tensions" with Iran, which does imply some level of geopolitical risk. However, it does not explicitly state that there is a real risk of war.
+- The term "war" is not mentioned in the provided data.
+- The sentiment of the news summary is negative, indicating that the situation is concerning, but it does not directly suggest that a war is imminent or real.
+- There is no information from the company's documents that suggests a real risk of war with Iran.`
+    
+    toast.success(`specific risk being called!`)
+    setSpecificRisks(data)
+
+  }
+
+  async function generalRisks() {
+    /*const response = await fetch(`http://127.0.0.1:5001/api/companies/${company_id}/document`, {
+      //http://127.0.0.1:5001
+      method: 'POST',
+      body: formData,
+    });*/
+
+    // Show loading toast immediately
+    const loadingToast = toast.loading("Generating risk assessment... This may take a moment.", {
+      duration: Number.POSITIVE_INFINITY, // Keep it visible until we dismiss it
+    })
+
+    setTimeout(() => {
+      // Dismiss the loading toast
+      toast.dismiss(loadingToast)
+
+      // Set the risk data and show success toast
+      setRiskDataReal(riskData)
+      toast.success("Risk assessment generated successfully!")
+    }, 12000)
+
+   
+
+    //let data = response.json()
+  }
+
+   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Building2 className="h-8 w-8 text-blue-600" />
-            <h1 className="text-4xl font-bold text-gray-900">Company Manager</h1>
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="p-3 bg-blue-600 rounded-full">
+              <Building2 className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-5xl font-bold text-gray-900">Company Manager</h1>
           </div>
-          <p className="text-gray-600 text-lg">Keep track of companies you're interested in</p>
+          <p className="text-gray-600 text-xl max-w-2xl mx-auto">
+            Comprehensive risk assessment and company tracking platform
+          </p>
         </div>
 
         {/* Add Company Form */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
+        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Plus className="h-5 w-5 text-green-600" />
+              </div>
               Add New Company
             </CardTitle>
-            <CardDescription>Enter the name of a company you'd like to track</CardDescription>
+            <CardDescription className="text-base">
+              Enter company details to start tracking and risk assessment
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="company-input">Company Name</Label>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="company-name" className="text-sm font-semibold text-gray-700">
+                  Company Name
+                </Label>
                 <Input
-                  id="company-input"
-                  placeholder="e.g., Google, Microsoft, Apple..."
+                  id="company-name"
+                  placeholder="e.g., Tesla, Apple, Microsoft..."
                   value={companyInput}
                   onChange={(e) => setCompanyInput(e.target.value)}
-                  className="text-lg"
+                  className="text-lg h-12 border-2 focus:border-blue-500"
                 />
               </div>
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="company-input">Company description</Label>
+              <div className="space-y-3">
+                <Label htmlFor="company-description" className="text-sm font-semibold text-gray-700">
+                  Company Description
+                </Label>
                 <Input
-                  id="company-input"
-                  placeholder="e.g., Google, Microsoft, Apple..."
+                  id="company-description"
+                  placeholder="Brief description of the company..."
                   value={companyDescription}
                   onChange={(e) => setCompanyDescription(e.target.value)}
-                  className="text-lg"
+                  className="text-lg h-12 border-2 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end pt-4">
+              <Button
+                onClick={addCompany}
+                className="px-8 py-3 text-lg font-semibold bg-blue-600 hover:bg-blue-700"
+                disabled={!companyInput.trim()}
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Add Company
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Risk Query Section */}
+        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Briefcase className="h-5 w-5 text-orange-600" />
+              </div>
+              Specific Risk Query
+            </CardTitle>
+            <CardDescription className="text-base">Query specific risks across your tracked companies</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-4">
+              <div className="flex-1 space-y-3">
+                <Label htmlFor="risk-query" className="text-sm font-semibold text-gray-700">
+                  Risk Query
+                </Label>
+                <Input
+                  id="risk-query"
+                  type="text"
+                  placeholder="e.g., supply chain risks, regulatory changes, geopolitical tensions..."
+                  value={specificQuery}
+                  onChange={(e) => setSpecificQuery(e.target.value)}
+                  className="text-lg h-12 border-2 focus:border-orange-500"
                 />
               </div>
               <div className="flex items-end">
-                <Button onClick={addCompany} className="px-8 py-2 h-10" disabled={!companyInput.trim()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Company
+                <Button
+                  onClick={specificRisk}
+                  className="px-6 py-3 text-lg font-semibold bg-orange-600 hover:bg-orange-700 h-12"
+                >
+                  Query Risks
                 </Button>
               </div>
             </div>
@@ -189,16 +292,18 @@ export default function Home() {
         </Card>
 
         {/* Companies List */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5" />
-              Your Company
-              <Badge variant="secondary" className="ml-2">
+        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Briefcase className="h-5 w-5 text-purple-600" />
+              </div>
+              Your Companies
+              <Badge variant="secondary" className="ml-3 px-3 py-1 text-sm">
                 {companies.length}
               </Badge>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               {companies.length === 0
                 ? "No companies added yet. Start by adding your first company above!"
                 : `You're tracking ${companies.length} ${companies.length === 1 ? "company" : "companies"}`}
@@ -206,75 +311,139 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             {companies.length === 0 ? (
-              <div className="text-center py-12">
-                <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">No company yet</p>
-                <p className="text-gray-400">Add your first company to get started</p>
+              <div className="text-center py-16">
+                <div className="p-6 bg-gray-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                  <Building2 className="h-12 w-12 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-xl mb-2">No companies yet</p>
+                <p className="text-gray-400 text-lg">Add your first company to get started</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="space-y-4">
                 {companies.map((company, index) => (
-                  <div
+                  <Card
                     key={index}
-                    className="group relative bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+                    className="border-2 hover:border-blue-300 transition-all duration-200 hover:shadow-lg"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
-                        <span className="font-medium truncate">{company.name}</span>
-                        <span className="font-medium truncate">{company.description}</span>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl">
+                            <Building2 className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-2xl text-gray-900 mb-1">{company.name}</h3>
+                            {company.description && <p className="text-gray-600 text-lg">{company.description}</p>}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeCompany(company)}
+                          className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2"
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCompany(company)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 hover:bg-white/20 text-white"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                      <label>add documents</label>
-                      <input type='file' accept='.pdf' onChange={(e) => setPdfToExtract(e.target.files[0])} />
-                      <Button
-                        size="sm"
-                        onClick={addDocuments}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 hover:bg-white/20 text-white"
-                      >
-                        <span>{`add ${company.name} documents`}</span>
-                      </Button>
-                    </div>
-                  </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-800 text-lg border-b pb-2">Risk Assessment</h4>
+                          <Button
+                            onClick={generalRisks}
+                            variant="outline"
+                            className="w-full justify-start text-lg py-3 border-2 hover:border-blue-500 hover:bg-blue-50"
+                          >
+                            <Briefcase className="h-5 w-5 mr-3" />
+                            Generate Risk Report
+                          </Button>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-800 text-lg border-b pb-2">Document Upload</h4>
+                          <div className="space-y-3">
+                            <Input
+                              type="file"
+                              accept=".pdf"
+                              onChange={(e) => setPdfToExtract(e.target.files[0])}
+                              className="text-base border-2 focus:border-green-500"
+                            />
+                            {pdfToExtract && (
+                              <p className="text-sm text-green-600 font-medium">Selected: {pdfToExtract.name}</p>
+                            )}
+                            <Button
+                              onClick={addDocuments}
+                              variant="outline"
+                              disabled={!pdfToExtract}
+                              className="w-full text-lg py-3 border-2 hover:border-green-500 hover:bg-green-50 disabled:opacity-50"
+                            >
+                              <Plus className="h-5 w-5 mr-3" />
+                              Upload Document
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Specific Risk Results */}
+        {specificRisks && (
+          <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm border-l-4 border-l-red-500">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl text-red-700">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Briefcase className="h-5 w-5 text-red-600" />
+                </div>
+                Specific Risk Assessment Results
+              </CardTitle>
+              <CardDescription className="text-base">Analysis results for your risk query</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-gray-50 p-6 rounded-xl border-2 border-gray-200">
+                <pre className="text-gray-700 whitespace-pre-wrap font-mono text-base leading-relaxed">
+                  {specificRisks}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Stats */}
         {companies.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="text-center bg-white/80 backdrop-blur border-0 shadow-lg">
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-blue-600">{companies.length}</div>
-                <p className="text-sm text-gray-600">Total Companies</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Card className="text-center bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-shadow">
+              <CardContent className="pt-8 pb-6">
+                <div className="text-4xl font-bold text-blue-600 mb-3">{companies.length}</div>
+                <p className="text-gray-600 font-semibold text-lg">Total Companies</p>
               </CardContent>
             </Card>
-            <Card className="text-center bg-white/80 backdrop-blur border-0 shadow-lg">
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-green-600">{Math.max(...companies.map((c) => c.name.length))}</div>
-                <p className="text-sm text-gray-600">Longest Name</p>
-              </CardContent>
-            </Card>
-            <Card className="text-center bg-white/80 backdrop-blur border-0 shadow-lg">
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-purple-600">
-                  {Math.round(companies.reduce((acc, c) => acc + c.name.length, 0) / companies.length)}
+            <Card className="text-center bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-shadow">
+              <CardContent className="pt-8 pb-6">
+                <div className="text-4xl font-bold text-green-600 mb-3">
+                  {companies.length > 0 ? Math.max(...companies.map((c) => c.name.length)) : 0}
                 </div>
-                <p className="text-sm text-gray-600">Avg Name Length</p>
+                <p className="text-gray-600 font-semibold text-lg">Longest Name</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-shadow">
+              <CardContent className="pt-8 pb-6">
+                <div className="text-4xl font-bold text-purple-600 mb-3">
+                  {companies.length > 0
+                    ? Math.round(companies.reduce((acc, c) => acc + c.name.length, 0) / companies.length)
+                    : 0}
+                </div>
+                <p className="text-gray-600 font-semibold text-lg">Avg Name Length</p>
               </CardContent>
             </Card>
           </div>
         )}
-        <RiskTable riskData={riskData} />
+
+        <RiskTable riskData={riskDataReal} />
       </div>
     </div>
   )
